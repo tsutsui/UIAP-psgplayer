@@ -1,4 +1,4 @@
-all : flash
+#all : flash
 
 TARGET:=psg_play
 ADDITIONAL_C_FILES+=p6psg.c psg_driver.c tick2m.c ym2149_hw.c
@@ -10,5 +10,6 @@ FLASH_COMMAND?=$(MINICHLINK)/minichlink -c $(UIAP_BOOTLOADER_VIDPID) -w $< $(WRI
 CH32FUN_DIR?=./ch32fun/ch32fun
 include $(CH32FUN_DIR)/ch32fun.mk
 
+all: $(TARGET).bin
 flash : cv_flash
 clean : cv_clean
