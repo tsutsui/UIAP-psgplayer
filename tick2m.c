@@ -18,10 +18,14 @@ tick2m_init(void)
 	/*
 	 * 48MHz / (47 + 1) = 1MHz
 	 * 1MHz / (1999 + 1) = 500Hz = 2ms
+	 *
+	 * PC-6001 の 2ms 割り込みは正確には 2.05128192 ms
+	 * (3.9936MHz の 4分周クロックの 2048カウント) なので
+	 * 1MHz / (2050 + 1) の 2.051ms に設定する
 	 */
 	TIM2->CTLR1 = 0;
 	TIM2->PSC = 47;
-	TIM2->ATRLR = 1999;
+	TIM2->ATRLR = 2050;
 	TIM2->CNT = 0;
 	TIM2->INTFR = 0;
 	TIM2->DMAINTENR |= TIM_UIE;
