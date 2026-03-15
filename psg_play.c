@@ -1,3 +1,9 @@
+/*
+ * psg_play.c
+ *  Minimal YM2149 (AY-3-8910 compatible) player
+ *  UIAPduino version
+ */
+
 #include <stdint.h>
 #include "ch32fun.h"
 #include "ym2149_hw.h"
@@ -5,6 +11,7 @@
 #include "psg_driver.h"
 #include "p6psg.h"
 
+/* コンパイル済み P6 PSG曲データ */
 #include "psg_data.c"
 
 static p6psg_t *psg;
@@ -92,7 +99,7 @@ main(int argc, char *argv[])
 			pending--;
 
 			/*
-			 * ここも手元の psg_driver API 名に合わせる。
+			 * PSGドライバ演奏周期処理呼び出し
 			 */
 			psg_driver_tick(drv);
 		}
