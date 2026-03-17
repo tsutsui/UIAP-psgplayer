@@ -8,7 +8,8 @@
 
 ROM 上のデータとして配置した P6 PSG ドライバ形式の PSG 楽曲データを演奏します。
 
-ビルド環境には Arduino ではなく `ch32fun` を使用しています。
+ビルド環境には Arduino ではなく [`ch32fun`](https://github.com/cnlohr/ch32fun)
+を使用しています。
 
 ハードウェア依存バックエンドの実装、演奏データを ROM 上に保持する構成、
 画面 UI を持たない点を除き、全体構造は
@@ -102,14 +103,9 @@ make
 gmake
 ```
 
-NetBSD 上でも、 `Makefile` で
-
-```
-PREFIX=riscv64-none-elf
-```
-
-として pkgsrc の `cross/riscv64-none-elf-gcc` を使用するように設定すれば、
-少なくともバイナリのビルドまでは可能なようです。
+`ch32fun` 側に [NetBSDサポート](https://github.com/cnlohr/ch32fun/pull/873)
+を入れてもらったので NetBSD 上でも pkgsrc の `cross/riscv64-none-elf-gcc`
+を使用してのビルドも可能です。
 
 ## 書き込み
 
@@ -121,12 +117,18 @@ VID:PID を前提としているため、そのままでは UIAPduino への書�
 このため、`Makefile` 内で flash コマンドを上書きし、UIAPduino の
 PID (`0xb803`) を明示的に指定することで、`make flash` で書き込めるようにしています。
 
-（なお、現状の実装を見る限り、NetBSD 上で `minichlink` を動かすにはかなりの作業が必要そうです）
+前述の `ch32fun` へのプルリクエストのマージされたので NetBSD 上でも pkgsrc の
+[libhidapi](https://cdn.netbsd.org/pub/pkgsrc/current/pkgsrc/comms/libhidapi/index.html) と
+[libusb1](https://cdn.netbsd.org/pub/pkgsrc/current/pkgsrc/devel/libusb1/index.html)
+をインストールすれば `minichlink` を使った書き込みは可能ですが、
+`xhci(4)` の場合は
+[`xhci(4)` ドライバのバグ](https://gnats.netbsd.org/60074)
+あるため書き込みができない状況が発生しやすいです。
 
 書き込みは以下で行います。
 
 ```sh
-make flash
+sudo make flash
 ```
 
 ## サンプル演奏データ
