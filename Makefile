@@ -13,6 +13,9 @@ FLASH_COMMAND?=$(MINICHLINK)/minichlink -c $(UIAP_BOOTLOADER_VIDPID) -w $< $(WRI
 CH32FUN_DIR?=./ch32fun/ch32fun
 include $(CH32FUN_DIR)/ch32fun.mk
 
+# Enalbe this to build for YMZ284 instead of YM2149F
+#CFLAGS+=-DYMZ284
+
 all: $(TARGET).bin
 flash : cv_flash
 clean : cv_clean

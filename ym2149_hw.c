@@ -14,14 +14,26 @@
  * D10/PD0:    RESET (直結でlow-active; Raspberry Pi GPIO版とは異なる)
  * A3/D12/PD2: 2MHz CLOCK (TIM1 PWM)
  *  YM2149Fの BC2は回路上で H 固定
+ *
+ * YMZ284 では以下が異なる
+ * A1/D0/PA1:  A0
+ * A0/D1/PA2:  WR
+ * D10/PD0:    IC (名前が異なるだけで動作は RESET と同じ)
+ * A3/D12/PD2: 4MHz CLOCK (TIM1 PWM)
+ *  YMZ284の CSは回路上で L 固定 (常に有効で WR のみで制御)
  */
 
 #include "ch32fun.h"
 #include "ym2149_hw.h"
 
+#ifdef YMZ284
+#define	YM_PA_A0		(1U << 1)	/* PA1 */
+#define	YM_PA_WR		(1U << 2)	/* PA2 */
+#else /* YM2149F */
 #define	YM_PA_BC1		(1U << 1)	/* PA1 */
 #define	YM_PA_BDIR		(1U << 2)	/* PA2 */
 #define	YM_PA_CTRL_MASK		(YM_PA_BC1 | YM_PA_BDIR)
+#endif
 
 #define	YM_PC_DATA_MASK		0x00ffU		/* PC0..PC7 */
 
@@ -72,20 +84,35 @@ ym_bus_hold(void)
 static void
 ym_ctrl_inactive(void)
 {
+#ifdef YMZ284
+	gpio_mask_write(&GPIOA->BSHR, YM_PA_WR, YM_PA_WR);
+	gpio_mask_write(&GPIOA->BSHR, YM_PA_A0, 0);
+#else
 	gpio_mask_write(&GPIOA->BSHR, YM_PA_CTRL_MASK, 0);
+#endif
 }
 
 static void
 ym_ctrl_address(void)
 {
+#ifdef YMZ284
+	gpio_mask_write(&GPIOA->BSHR, YM_PA_A0, 0);
+	gpio_mask_write(&GPIOA->BSHR, YM_PA_WR, 0);
+#else
 	gpio_mask_write(&GPIOA->BSHR, YM_PA_CTRL_MASK,
 	    YM_PA_BDIR | YM_PA_BC1);
+#endif
 }
 
 static void
 ym_ctrl_write(void)
 {
+#ifdef YMZ284
+	gpio_mask_write(&GPIOA->BSHR, YM_PA_A0, YM_PA_A0);
+	gpio_mask_write(&GPIOA->BSHR, YM_PA_WR, 0);
+#else
 	gpio_mask_write(&GPIOA->BSHR, YM_PA_CTRL_MASK, YM_PA_BDIR);
+#endif
 }
 
 static void
@@ -197,16 +224,27 @@ ym2149_hw_clock_start(void)
 	/*
 	 * TIM1_CH1 on PD2
 	 *
+	 * YM2149F: 2MHz clock (SEL=H or OPEN)
 	 * 48MHz / (PSC + 1) / (ATRLR + 1)
 	 * PSC = 0, ATRLR = 23 -> 2MHz
 	 * CH1CVR = 12 -> 約 50% duty
+	 *
+	 * YMZ284: 4MHz clock
+	 * 48MHz / (PSC + 1) / (ATRLR + 1)
+	 * PSC = 0, ATRLR = 11 -> 4MHz
+	 * CH1CVR =  6 -> 約 50% duty
 	 */
 	ym_pd2_set_tim1_ch1();
 
 	TIM1->CTLR1 = 0;
 	TIM1->PSC = 0;
+#ifdef YMZ284
+	TIM1->ATRLR = 11;
+	TIM1->CH1CVR = 6;
+#else
 	TIM1->ATRLR = 23;
 	TIM1->CH1CVR = 12;
+#endif
 
 	TIM1->CHCTLR1 &= ~(TIM_OC1M | TIM_CC1S);
 	TIM1->CHCTLR1 |= TIM_OC1PE | TIM_OC1M_2 | TIM_OC1M_1;
