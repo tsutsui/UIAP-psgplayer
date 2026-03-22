@@ -6,6 +6,12 @@
  *
  * このファイルのライセンスは上記アレンジ元の利用規約に従います
  * https://nogika-chaba.fanbox.cc/posts/6668165
+ *
+ * コンパイル元の MMLは以下
+ * https://github.com/tsutsui/p6-odorumiku/blob/main/mml/sm40196287_p6drv.mml
+ *
+ * 上記 PC-6001 PSG音源ドライバ互換 MMLコンパイラは以下
+ * https://github.com/tsutsui/p6psgmmlc
  */
 const uint8_t psgdata[] = {
 	0x08, 0x00, 0x6e, 0x02, 0x86, 0x04, 0x00, 0x00,	/* 0x0000 */
